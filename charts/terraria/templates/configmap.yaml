@@ -60,7 +60,7 @@ data:
   config.json: |
     {
       "Settings": {
-        "ServerPassword": "{{ .Values.password }}",
+        "ServerPassword": "{{ .Values.server.password }}",
         "ServerPort": 7777,
         "MaxSlots": {{ .Values.server.maxPlayers.base }},
         "ReservedSlots": {{ .Values.server.maxPlayers.reserved }},
