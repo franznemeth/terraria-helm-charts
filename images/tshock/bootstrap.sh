@@ -86,5 +86,4 @@ echo "ARGS: $args"
 cat "$config"
 ls -al /home/terraria/server
 
-# shellcheck disable=SC2086
-mono --server --gc=sgen -O=all /tshock/TerrariaServer.exe $args
+/tshock/TShock.Server $args

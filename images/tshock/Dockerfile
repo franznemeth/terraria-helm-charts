@@ -21,23 +21,27 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
 
-FROM alpine:3.14.2 AS base
+FROM mcr.microsoft.com/dotnet/runtime:6.0
 
-RUN apk add --update-cache unzip
+LABEL maintainer="Franz Nemeth <franz.nemeth@fnemeth.net>"
 
-ENV TSHOCK_VERSION=v4.5.5
-ENV TSHOCK_ZIP=TShock4.5.5_Terraria_1.4.2.3.zip
+#RUN apk add --update-cache unzip aspnetcore6-runtime dotnet6-sdk pcre-tools
+RUN apt update && apt install -y unzip pcregrep && rm -rf /var/lib/apt/lists*
+
+
+ENV TSHOCK_VERSION=v5.2.0
+ENV TSHOCK_ZIP=TShock-5.2-for-Terraria-1.4.4.9-linux-x64-Release.zip
 
 # Download and unpack TShock
 ADD https://github.com/Pryaxis/TShock/releases/download/$TSHOCK_VERSION/$TSHOCK_ZIP /
-RUN unzip $TSHOCK_ZIP -d /tshock && \    
-  rm $TSHOCK_ZIP && \
-  chmod +x /tshock/TerrariaServer.exe
-
-# Cannot be the slim version, plugins may have dependencies
-FROM mono:6.12.0.107
-
-LABEL maintainer="Seppe Volkaerts <contact@seppevolkaerts.be>"
+RUN unzip $TSHOCK_ZIP -d /tshock && \
+    tar xfva /tshock/TShock-Beta-linux-x64-Release.tar -C /tshock/ && \
+    rm $TSHOCK_ZIP && \
+    chmod +x /tshock/TShock.Server && \
+    groupadd terraria -g 1000 && \
+    useradd terraria -m -u 1000 -g 1000 && \
+    chown terraria:terraria /tshock && \
+    mkdir /tshock/tmp
 
 # Server port
 EXPOSE 7777
@@ -45,25 +49,10 @@ EXPOSE 7777
 # Rest API port
 EXPOSE 7878
 
-COPY --from=base /tshock /tshock
 COPY bootstrap.sh /tshock
-
-RUN groupadd terraria -g 1000 && \
-  useradd terraria -m -u 1000 -g 1000 && \
-  apt-get update -y && \
-  # Install nuget to grab TShock dependencies
-  apt-get install -y nuget pcregrep && \
-  rm -rf /var/lib/apt/lists* /tmp* && \
-  # The bootstrap script needs to be able to copy plugins to the ServerPlugins directory
-  chown terraria:terraria /tshock/ServerPlugins && \
-  mkdir /tshock/tmp && \
-  chown terraria:terraria /tshock/tmp
 
 WORKDIR /home/terraria/server
 
-RUN chown -R terraria:terraria .
-
-USER terraria
 
 VOLUME [ "/home/terraria/server/worlds"  ]
 VOLUME [ "/home/terraria/server/logs"    ]
@@ -71,10 +60,15 @@ VOLUME [ "/home/terraria/server/plugins" ]
 VOLUME [ "/home/terraria/server/config"  ]
 VOLUME [ "/home/terraria/server/tshock"  ]
 
-RUN mkdir worlds && \
-  mkdir logs && \
-  mkdir config && \
-  mkdir plugins && \
-  mkdir tshock
+RUN mkdir -p worlds && \
+  mkdir -p logs && \
+  mkdir -p config && \
+  mkdir -p plugins && \
+  mkdir -p tshock
+
+RUN chown -R terraria:terraria /home/terraria/server && \
+    chown -R terraria:terraria /tshock
+
+USER terraria
 
 ENTRYPOINT [ "/bin/sh", "/tshock/bootstrap.sh" ]

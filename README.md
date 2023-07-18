@@ -15,7 +15,7 @@ Please refer to Helm's [documentation](https://helm.sh/docs/) to get started.
 Once Helm is set up properly, add the repo as follows:
 
 ```
-helm repo add terraria https://www.seppevolkaerts.be/terraria-helm-charts/
+helm repo add terraria oci://registry.fnemeth.net/terraria/terraria
 ```
 
 You can then run `helm search repo terraria` to see the charts.
