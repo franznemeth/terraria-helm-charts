@@ -54,7 +54,23 @@ spec:
         - name: logs
           emptyDir: {}
         - name: config
-          emptyDir: {}
+          {{- if .Values.config.persistentVolume.enabled }}
+          persistentVolumeClaim:
+            {{- $configClaimName := "" }}
+            {{- if .Values.config.persistentVolume.existingClaim }}
+              {{- $configClaimName = tpl .Values.config.persistentVolume.existingClaim . }}
+            {{- else }}
+              {{- $configClaimName = printf "%s-config" (include "terraria.fullname" .) }}
+            {{- end }}
+            claimName: {{ $configClaimName }}
+          {{- else }}
+          emptyDir:
+            {{- if .Values.config.emptyDir.sizeLimit }}
+            sizeLimit: {{ .Values.config.emptyDir.sizeLimit }}
+            {{- else }}
+            {}
+            {{- end -}}
+          {{- end }}
       initContainers:
         {{- if .Values.extraInitContainers }}
         {{- range $name, $spec := .Values.extraInitContainers }}

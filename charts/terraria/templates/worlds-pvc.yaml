@@ -11,7 +11,6 @@ spec:
   accessModes:
     {{- toYaml .Values.world.persistentVolume.accessModes | nindent 4 }}
   {{- if .Values.world.persistentVolume.volumeBindingMode }}
-  volumeBindingModeName: {{ .Values.world.persistentVolume.volumeBindingMode }}
   {{- end }}
   resources:
     requests:

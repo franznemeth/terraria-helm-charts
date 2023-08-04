@@ -202,6 +202,31 @@ plugins:
   # Whether the API version should be checked, disabling this allows older plugins to run
   versionCheck: true
 
+# Config
+config:
+  # Persistent volume where tshock configs are stored
+  persistentVolume:
+    # If a persistent volume should be used to store worlds, otherwise uses emptyDir
+    enabled: true
+
+    # The persistent volume access modes
+    # Must match those of existing PV or dynamic provisioner
+    # Ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
+    accessModes:
+      - ReadWriteOnce
+
+    # An existing persistent volume claim name, will be used instead of the default one
+    # If defined, the persistent volume claim must be created manually before volume will be bound
+    existingClaim: null
+
+    # The size of the persistent volume
+    size: 10Mi
+
+  # Worlds empty dir
+  emptyDir:
+    # Volume size limit
+    sizeLimit: null
+
 # Chat
 #  tshock-only
 chat:
