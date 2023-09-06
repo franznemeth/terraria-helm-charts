@@ -4,3 +4,8 @@
 {{- else if ge $maxPlayersBase 256 }}
   {{- fail (printf "maxPlayers '%d' is invalid, must be smaller than 256" $maxPlayersBase) }}
 {{- end }}
+{{- if .Values.ingress.enabled }}
+  {{- if not (or .Values.rest.enabled .Values.flyingsnake.enabled )}}
+    {{- fail (printf "if ingress.enabled=true either rest.enabled or/and flyingsnake.enabled must be set to true") }}
+  {{- end }}
+{{- end }}

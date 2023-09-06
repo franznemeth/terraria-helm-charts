@@ -1,0 +1,34 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+.magnify-wrapper {
+  position: relative;
+  max-height: 50vh;
+  img {
+    max-height: inherit;
+  }
+  #large-img {
+    background: url("Output.png")
+    no-repeat #fff;
+    width: 200px;
+    height: 200px;
+    box-shadow: 0 5px 10px -2px rgba(0, 0, 0, 0.3);
+    pointer-events: none;
+    position: absolute;
+    border: 4px solid #efefef;
+    z-index: 99;
+    border-radius: 100%;
+    display: block;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  &:hover,
+  &:active {
+    #large-img {
+      opacity: 1;
+    }
+  }
+}

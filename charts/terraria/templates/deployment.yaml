@@ -13,6 +13,9 @@ spec:
     metadata:
       labels:
         {{- include "terraria.selectorLabels" . | nindent 8 }}
+      annotations:
+        checksum/nginx-config: {{ include (print $.Template.BasePath "/flyingsnake-configmap.yaml") . | sha256sum }}
+        checksum/tshock-config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
     spec:
       {{- with .Values.image.pullSecrets }}
       imagePullSecrets:
@@ -25,6 +28,12 @@ spec:
         runAsGroup: 1000
         fsGroup: 1000
       volumes:
+        - name: nginx-config
+          configMap:
+            name: {{ include "terraria.fullname" . }}-nginx-config
+            items:
+              - key: nginx.conf
+                path: nginx.conf
         - name: server-config
           configMap:
             name: {{ include "terraria.fullname" . }}
@@ -98,6 +107,27 @@ spec:
               mountPath: /tshock-config
         {{- end }}
       containers:
+        {{- if .Values.flyingsnake.enabled }}
+        - name: flyingsnake
+          image: {{ tpl .Values.flyingsnake.repository . }}:{{ tpl .Values.flyingsnake.tag . }}
+          imagePullPolicy: {{ .Values.flyingsnake.pullPolicy }}
+          securityContext:
+            runAsNonRoot: false
+            runAsUser: 0
+          env:
+            - name: WORLD_NAME
+              value: {{ tpl .Values.world.name . }}
+          volumeMounts:
+            - name: worlds
+              mountPath: /home/terraria/server/worlds
+            - name: nginx-config
+              mountPath: /etc/nginx/nginx.conf
+              readOnly: true
+              subPath: nginx.conf
+          ports:
+            - containerPort: 8080
+              name: flyingsnake
+        {{- end }}
         - name: {{ .Chart.Name }}
           image: {{ tpl .Values.image.terraria.repository . }}:{{ tpl .Values.image.terraria.tag . }}
           imagePullPolicy: {{ default .Values.image.pullPolicy .Values.image.terraria.pullPolicy }}

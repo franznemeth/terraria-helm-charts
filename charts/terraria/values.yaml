@@ -339,6 +339,39 @@ image:
     # The pull policy, image.pullPolicy is used if not set
     pullPolicy: null
 
+flyingsnake:
+  # This image generates a png of your terraria world and serves it via nginx
+  # https://github.com/Steffo99/flyingsnake
+
+  enabled: false
+
+  # The pull policy that is used for the flyingsnake image
+  pullPolicy: Always
+
+  # The pull secrets
+  pullSecrets: []
+
+  # The terraria server image
+  repository: registry.fnemeth.net/terraria/flyingsnake
+  tag: latest
+
+  # Service settings
+  # Ref: https://kubernetes.io/docs/tutorials/kubernetes-basics/expose/expose-intro/
+  service:
+
+    # The service type
+    type: ClusterIP
+
+    # The service port
+    port: 8080
+
+    # The port the rest api will be exposed as externally, if the service type is "NodePort", this
+    # will be the fixed port instead of a random one in the node port range
+    nodePort: null
+
+    # Load balancer IP, if service type is "LoadBalancer"
+    loadBalancerIP: null
+
 # Configuration when used in combination with terre
 terre:
 
@@ -417,3 +450,18 @@ serviceAccount:
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
   name: ""
+
+ingress:
+  # Ingress used for REST and flyingsnake
+  enabled: false
+  className: "nginx"
+  pathtype: ImplementationSpecific
+  annotations: {}
+  # kubernetes.io/ingress.class: nginx
+  # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: terraria-example.local
+  tls:
+    - secretName: terraria-example.local
+      hosts:
+        - terraria-example.local
